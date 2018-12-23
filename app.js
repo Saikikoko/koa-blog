@@ -3,6 +3,7 @@ const static = require('koa-static');
 const views = require('koa-views');
 const Router = require('./routers/router');
 const logger = require('koa-logger');
+<<<<<<< HEAD
 const body = require('koa-body');
 const session = require('koa-session');
 const {join} = require('path');
@@ -29,6 +30,17 @@ app.use(static(join(__dirname,'public')));
 
 //配置视图模板
 app.use(views(join(__dirname,'views'),{
+=======
+const {join} = require('path');
+//生成koa实例
+const app = new Koa;
+//注册日志模块
+app.use(logger());
+//配置静态资源目录
+app.use(static(join(__dirname,'public')));
+//配置视图模板
+app.use(views(join(__dirname,'./views'),{
+>>>>>>> e37ad2fffd12bbd681394c7a0783d69e6f91bf8d
     extension: "pug"
 }))
 
