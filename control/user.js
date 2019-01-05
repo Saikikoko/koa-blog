@@ -93,10 +93,12 @@ exports.login = async ctx=>{
             overwrite: false
         })
 
-        // ctx.session = {
-        //     username,
-        //     uid: data[0]._id
-        // }
+        ctx.session = {
+            username,
+            uid: data[0]._id,
+            avatar: data[0].avatar
+        }
+        
         await ctx.render('isOk',{
             status: "用户登录成功"
         })
@@ -126,5 +128,19 @@ exports.keepLog = async (ctx,next)=>{
         }
     }
     await next();
-     //ctx.body = "done"
+}
+
+//用户退出中间件
+exports.logout = async ctx => {
+    ctx.session = null;
+    ctx.cookies.set("usename",null,{
+        maxAge: 0
+    })
+
+    ctx.cookies.set("uid",null,{
+        maxAge: 0
+    })
+
+    //在后台重定向
+    ctx.redirect("/");
 }
