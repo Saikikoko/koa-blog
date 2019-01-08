@@ -38,3 +38,36 @@ app
   .use(Router.allowedMethods());
 
 app.listen(3000);
+
+//创建管理员用户，如果管理员用户已存在，则返回
+{
+    const {db} = require('./Schema/config');
+    const UserSchema = require('./Schema/user');
+    const encrypt = require('./until/encrypt');
+    const User = db.model('users',UserSchema);
+
+    User
+    .find({username: "admin"})
+    .then(data=>{
+        if(data.length === 0){
+            //管理员不存在
+            new User({
+                username: "admin",
+                password: encrypt("admin"),
+                role: 666,
+                articleNum: 0,
+                commentNum: 0
+            })
+            .save()
+            .then(data=>{
+                console.log("管理员用户名：admin 密码：admin")
+            })
+            .catch(err=>{
+                console.log("管理员创建失败")
+            })
+        }else{
+            //管理员存在
+            console.log("管理员用户名：admin 密码：admin")
+        }
+    })
+}

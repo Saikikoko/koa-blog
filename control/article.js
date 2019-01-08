@@ -1,11 +1,16 @@
 const {db} = require('../Schema/config');
 
-const ArticleSchema = require('../Schema/article');
 //取用户的Schema,为了拿到操作用户集合的对象
 const UserSchema = require('../Schema/user');
 const User = db.model('users',UserSchema);
+
 //创建Article model操作数据库
+const ArticleSchema = require('../Schema/article');
 const Article = db.model('articles', ArticleSchema);
+
+//创建Comment model操作数据库
+const CommentSchema = require('../Schema/comment');
+const Comment = db.model('comments', CommentSchema);
 
 //返回文章发表页
 exports.addPage = async ctx=>{
@@ -28,10 +33,17 @@ exports.add = async ctx =>{
     //这是用户在登录情况下，发送过来的数据
     const data = ctx.request.body;
     data.author = ctx.session.uid;
+    data.commentNum = 0;
 
     await new Promise((res,rej)=>{
         new Article(data).save((err,data)=>{
             if(err) rej(err);
+            //更新用户文章计数
+            User.update({_id:data.author},{$inc:{articleNum: 1}},err=>{
+                if(err)return console.log(err)
+            })
+            
+
             res(data);
         })
     })
@@ -76,4 +88,34 @@ exports.getList = async ctx => {
         artList,
         maxNum
     })
+}
+
+//文章详情
+exports.details = async ctx => {
+    //动态获取路由里的id
+    const _id = ctx.params.id;
+
+    const article = await Article
+    .findById(_id)
+    .populate("author","username")
+    .then(data=>data)
+
+    //查找当前文章的所有评论
+    const comment = await Comment
+    .find({article:_id})
+    .sort("-created")
+    .populate("from","username avatar")
+    .then(data=>data)
+    .catch(err=>{
+        console.log(err)
+    });
+
+    await ctx.render("article",{
+        title: article.title,
+        article,
+        comment,
+        session: ctx.session 
+    })
+
+    
 }

@@ -23,7 +23,9 @@ exports.reg = async (ctx)=>{
             //用户名不存在，需要保存到数据库
             const _user = new User({
                 username,
-                password:encrypt(password)
+                password:encrypt(password),
+                commentNum: 0,
+                articleNum: 0
             })
 
             _user.save((err,data)=>{
@@ -96,7 +98,8 @@ exports.login = async ctx=>{
         ctx.session = {
             username,
             uid: data[0]._id,
-            avatar: data[0].avatar
+            avatar: data[0].avatar,
+            role: data[0].role
         }
         
         await ctx.render('isOk',{
