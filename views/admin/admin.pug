@@ -30,7 +30,15 @@ html
         //- 用户登录按钮
         ul.layui-nav.blog-user
           li.layui-nav-item
-            a(href="/user/logout") 退了
+            a(href="")
+              //- 用户测试头像
+              img(src=avatar).layui-nav-img
+              span= username
+            dl.layui-nav-child
+              dd
+                a(href="/user/logout") 退出登录
+          //- li.layui-nav-item
+          //-   a(href="/user/logout") 退了
     // 左侧导航
     .layui-side.layui-bg-black
       .layui-side-scroll
@@ -53,9 +61,9 @@ html
         var element = layui.element;
         const $ = layui.$
 
-        $("a").each((i, v) => {
+        $("li>a").each((i, v) => {
           const a_href = $(v).prop('href')
-
+          console.log(a_href)
           
           if(a_href === location.href){
             $('li').eq(i).addClass("layui-this")

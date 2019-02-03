@@ -1,10 +1,8 @@
-const {db} = require('../Schema/config');
-
-const UserSchema = require('../Schema/user');
+const Article = require('../Models/article')
+const User = require('../Models/user')
+const Comment = require('../Models/comment')
 //引入加密模块
 const encrypt = require('../until/encrypt');
-//创建User model操作数据库
-const User = db.model('users',UserSchema);
 
 //用户注册
 exports.reg = async (ctx)=>{
@@ -86,7 +84,7 @@ exports.login = async ctx=>{
             overwrite: false
         })
         //cookie存储用户ID
-        console.log(data);
+        // console.log(data);
         ctx.cookies.set("uid",data[0]._id,{
             domain: "localhost",
             path: "/",
@@ -121,29 +119,67 @@ exports.login = async ctx=>{
 
 //保持用户的状态
 exports.keepLog = async (ctx,next)=>{
-    // ctx.session = null;
-    if(ctx.session.isNew){//session没值
-        if(ctx.cookies.get("uid")){
-            ctx.session = {
-                username: ctx.cookies.get("username"),
-                uid: ctx.cookies.get("uid")
-            }
-        }
-    }
-    await next();
+  // ctx.session = null;
+  if(ctx.session.isNew){//session没值 没有登录
+      const uid = ctx.cookies.get("uid")
+      if(uid){
+          const data = await User.findById(uid).then(data => data)
+          console.log(data)
+          ctx.session = {
+              username: ctx.cookies.get("username"),
+              uid: ctx.cookies.get("uid"),
+              avatar: data.avatar,
+              role: data.role
+          }
+      }
+  }
+  await next();
 }
 
 //用户退出中间件
 exports.logout = async ctx => {
-    ctx.session = null;
-    ctx.cookies.set("usename",null,{
-        maxAge: 0
-    })
+  ctx.session = null;
+  ctx.cookies.set("usename",null,{
+      maxAge: 0
+  })
 
-    ctx.cookies.set("uid",null,{
-        maxAge: 0
-    })
+  ctx.cookies.set("uid",null,{
+      maxAge: 0
+  })
 
-    //在后台重定向
-    ctx.redirect("/");
+  //在后台重定向
+  ctx.redirect("/");
+}
+
+
+exports.usrList = async ctx => {
+  const data = await User.find()
+  console.log(data)
+  ctx.body = {
+    code: 0,
+    count: data.length,
+    data
+  }
+}
+
+exports.delete = async ctx => {
+  const id = ctx.params.id
+
+  let res = {
+    state: 1,
+    message: "删除成功"
+  }
+
+  //删除评论
+  await User
+  .findById({_id:id})
+  .then(data => data.remove())
+  .catch(err => {
+    res = {
+      state: 0,
+      message: "删除失败"
+    }
+  })
+
+  ctx.body = res
 }

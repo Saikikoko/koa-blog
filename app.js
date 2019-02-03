@@ -5,6 +5,7 @@ const Router = require('./routers/router');
 const logger = require('koa-logger');
 const body = require('koa-body');
 const session = require('koa-session');
+const compress = require('koa-compress')
 const {join} = require('path');
 //生成koa实例
 const app = new Koa;
@@ -18,6 +19,12 @@ const CONFIG = {
 }
 //注册日志模块
 app.use(logger());
+
+// 注册资源压缩模块 compress
+app.use(compress({
+  threshold: 2048,
+  flush: require('zlib').Z_SYNC_FLUSH
+}))
 
 //配置session
 app.use(session(CONFIG,app))
@@ -37,7 +44,7 @@ app
   .use(Router.routes())
   .use(Router.allowedMethods());
 
-app.listen(3000);
+app.listen(4000);
 
 //创建管理员用户，如果管理员用户已存在，则返回
 {

@@ -1,16 +1,6 @@
-const {db} = require('../Schema/config');
-
-//取用户的Schema,为了拿到操作用户集合的对象
-const UserSchema = require('../Schema/user');
-const User = db.model('users',UserSchema);
-
-//创建Article model操作数据库
-const ArticleSchema = require('../Schema/article');
-const Article = db.model('articles', ArticleSchema);
-
-//创建Comment model操作数据库
-const CommentSchema = require('../Schema/comment');
-const Comment = db.model('comments', CommentSchema);
+const Article = require('../Models/article')
+const User = require('../Models/user')
+const Comment = require('../Models/comment')
 
 
 //保存评论
@@ -64,4 +54,62 @@ exports.save = async ctx => {
     })
 
     ctx.body = message;
+}
+
+exports.comList = async ctx => {
+  const uid = ctx.session.uid
+
+  const data = await Comment.find({from:uid}).populate('article','title')
+
+  ctx.body = {
+    code: 0,
+    count: data.length,
+    data
+  }
+}
+
+exports.delete = async ctx => {
+  const commentId = ctx.params.id
+  
+  let res = {
+    state: 1,
+    message: "删除成功"
+  }
+
+  //删除评论
+  await Comment
+  .findById({_id:commentId})
+  .then(data => data.remove())
+  .catch(err => {
+    res = {
+      state: 0,
+      message: "删除失败"
+    }
+  })
+
+  ctx.body = res
+  // //用户评论计数器更新
+  // await User.updateOne({_id:uid},{$inc:{commentNum: -1}})
+
+  // //文章评论计数器更新
+  // await Article.updateOne({_id:articleId},{$inc:{commentNum: -1}})
+
+  // // let data = {
+  // //   state: 1,
+  // //   message: "删除成功"
+  // // }
+
+  // //评论更新
+  // await Comment.deleteOne({_id:commentId}).then(()=>{  
+  //   ctx.body = {
+  //     state: 1,
+  //     message: "删除成功"
+  //   }
+  // }).catch(err=>{
+  //   ctx.body = {
+  //     state: 0,
+  //     message: "删除失败"
+  //   }
+  // })
+
 }

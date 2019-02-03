@@ -25,17 +25,12 @@ block main
         // 文章id
         const articleId = data.article._id
 
-
         if(obj.event !== "del") return
 
         layer.confirm("确认删除？", () => {
           $.ajax({
             method: "delete",
             url: "/comment/" + commentId,
-            data: {
-              // 发送文章id值，减少后台查询
-              articleId
-            },
             success(res){
               if(res.state){
                 layer.msg(res.message, {

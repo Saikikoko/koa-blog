@@ -28,9 +28,6 @@ block main
           $.ajax({
             method: "delete",
             url: "/article/" + _id,
-            data: {
-              _id
-            },
             success(res){
               if(res.state){
                 layer.msg(res.message, {

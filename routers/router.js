@@ -3,6 +3,7 @@ const user = require('../control/user');
 const article = require('../control/article');
 const comment = require('../control/comment');
 const admin = require('../control/admin');
+const upload = require('../until/upload')
 const router = new Router;
 
 //设置主页
@@ -39,8 +40,29 @@ router.get("/article/:id",user.keepLog,article.details);
 //发表评论
 router.post('/comment',user.keepLog,comment.save);
 
-//管理页面
+//管理页面 文章 评论 头像上传页面
 router.get("/admin/:id",user.keepLog,admin.index);
+
+
+//头像上传
+router.post('/admin/upload',user.keepLog,upload.single('file'),admin.upload)
+
+//评论管理
+router.get('/user/comments',user.keepLog,comment.comList)
+
+//用户管理
+router.get('/user/users',user.keepLog,user.usrList)
+//文章管理
+router.get('/user/articles',user.keepLog,article.artList)
+
+//删除评论
+router.delete('/comment/:id',user.keepLog,comment.delete)
+
+//删除文章
+router.delete('/article/:id',user.keepLog,article.delete)
+
+//删除用户
+router.delete('/user/:id',user.keepLog,user.delete)
 
 //404页面
 router.get("*",async ctx => {
